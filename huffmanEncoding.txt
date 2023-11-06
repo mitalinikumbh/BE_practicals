@@ -1,0 +1,72 @@
+import java.util.PriorityQueue;
+import java.util.HashMap;
+
+class HuffmanNode implements Comparable<HuffmanNode> {
+    int frequency;
+    char data;
+    HuffmanNode left, right;
+
+    public HuffmanNode(int frequency, char data) {
+        this.frequency = frequency;
+        this.data = data;
+        this.left = null;
+        this.right = null;
+    }
+
+    @Override
+    public int compareTo(HuffmanNode node) {
+        return this.frequency - node.frequency;
+    }
+}
+
+public class HuffmanEncoding {
+    static HashMap<Character, String> huffmanCodes = new HashMap<>();
+
+    public static void generateCodes(HuffmanNode root, String code) {
+        if (root == null)
+            return;
+        if (root.left == null && root.right == null) {
+            huffmanCodes.put(root.data, code);
+        }
+        generateCodes(root.left, code + "0");
+        generateCodes(root.right, code + "1");
+    }
+
+    public static void buildHuffmanTree(String input) {
+        HashMap<Character, Integer> frequencyMap = new HashMap<>();
+        for (char c : input.toCharArray()) {
+            frequencyMap.put(c, frequencyMap.getOrDefault(c, 0) + 1);
+        }
+        PriorityQueue<HuffmanNode> priorityQueue = new PriorityQueue<>();
+        for (char key : frequencyMap.keySet()) {
+            priorityQueue.add(new HuffmanNode(frequencyMap.get(key), key));
+        }
+        while (priorityQueue.size() > 1) {
+            HuffmanNode left = priorityQueue.poll();
+            HuffmanNode right = priorityQueue.poll();
+            int sum = left.frequency + right.frequency;
+            HuffmanNode newNode = new HuffmanNode(sum, '-');
+            newNode.left = left;
+            newNode.right = right;
+            priorityQueue.add(newNode);
+        }
+        HuffmanNode root = priorityQueue.poll();
+        generateCodes(root, "");
+    }
+
+    public static String encode(String input) {
+        StringBuilder encodedString = new StringBuilder();
+        for (char c : input.toCharArray()) {
+            encodedString.append(huffmanCodes.get(c));
+        }
+        return encodedString.toString();
+    }
+
+    public static void main(String[] args) {
+        String input = "hello";
+        buildHuffmanTree(input);
+        String encodedString = encode(input);
+        System.out.println("Original String: " + input);
+        System.out.println("Encoded String: " + encodedString);
+    }
+}
